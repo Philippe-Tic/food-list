@@ -1,7 +1,9 @@
 {
   "rules": {
-    "indent": ["error", 2],
-    "quotes": ["error", "double"]
+    "no-unused-vars": "warn",
+    "no-var": "error",
+    "no-undef": "error",
+    "no-use-before-define": "error"
   },
-  "extends": ["next/core-web-vitals", "prettier"]
+  "extends": "next/core-web-vitals"
 }

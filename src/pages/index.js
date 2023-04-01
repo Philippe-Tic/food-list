@@ -1,59 +1,42 @@
-import { supabase } from "@/lib/initSupabase"
-import { Button } from "@chakra-ui/button"
-import { Box, Center } from "@chakra-ui/layout"
-import { Spinner } from "@chakra-ui/spinner"
+import useLogOut, { useCurrentUser } from "@/hooks/auth"
+import { Box, Button, Center, Spinner, useToast } from "@chakra-ui/react"
 import Head from "next/head"
 import { useRouter } from "next/navigation"
-import { useCallback, useEffect, useState } from "react"
+
+import { useRecipes } from "../hooks/recipes"
 
 export default function Home() {
-  const [isLoading, setIsLoading] = useState(true)
-  const [user, setUser] = useState(null)
+  const toast = useToast()
   const { push } = useRouter()
+  const { mutate: logOut, isLoading: isLoadingLogout } = useLogOut()
 
-  const signOut = async () => {
-    setIsLoading(true)
-    try {
-      const { error } = await supabase.auth.signOut()
-      console.log({ error })
-      if (!error) {
-        setUser(null)
-      } else {
-        console.error("error", error)
-      }
-    } catch (error) {
-      console.error("error", error)
-    } finally {
-      setIsLoading(false)
-    }
+  const handleLogout = () => {
+    logOut()
+    toast({
+      title: "Déconnexion",
+      description: "",
+      status: "success",
+      duration: 9000,
+      isClosable: true,
+    })
+    push("/signin")
   }
 
-  const fetchUser = useCallback(async () => {
-    setIsLoading(true)
-    try {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession()
-      console.log({ session })
-      setUser(session?.user || null)
+  const {
+    isLoading: isLoadingCurrentUser,
+    error: errorCurrentUser,
+    data: user,
+  } = useCurrentUser()
 
-      if (!session?.user) {
-        push("/signin")
-      }
-    } catch (error) {
-      console.error("error", error)
-    } finally {
-      setIsLoading(false)
-    }
-  }, [push])
+  const {
+    isLoading: isLoadingRecipes,
+    error: errorRecipes,
+    data: recipes,
+  } = useRecipes()
 
-  useEffect(() => {
-    if (!user) {
-      fetchUser()
-    }
-  }, [user, fetchUser])
+  const isLoading = isLoadingRecipes || isLoadingCurrentUser || isLoadingLogout
 
-  if (isLoading) {
+  if (isLoading || errorCurrentUser) {
     return (
       <Box pt={32}>
         <Center>
@@ -73,9 +56,14 @@ export default function Home() {
       </Head>
       <main>
         {user?.email}
-        <Button isLoading={isLoading} onClick={signOut}>
+        <Button isLoading={isLoading} onClick={handleLogout}>
           Déco
         </Button>
+        {errorRecipes && "Error loading recipes"}
+        {!errorRecipes &&
+          recipes?.map((recipe) => {
+            return <Box key={recipe.id}>{recipe.name}</Box>
+          })}
       </main>
     </>
   )

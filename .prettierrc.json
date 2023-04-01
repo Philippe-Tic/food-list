@@ -1,5 +1,8 @@
 {
   "trailingComma": "es5",
   "tabWidth": 2,
-  "semi": false
+  "semi": false,
+  "importOrder": ["^components/(.*)$", "^[./]"],
+  "importOrderSeparation": true,
+  "importOrderSortSpecifiers": true
 }

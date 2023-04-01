@@ -1,5 +1,5 @@
 import { FormGroup } from "@/components/FormGroup"
-import { supabase } from "@/lib/initSupabase"
+import { useSignUp } from "@/hooks/auth"
 import {
   Box,
   Button,
@@ -11,15 +11,20 @@ import {
   InputGroup,
   InputRightElement,
   VStack,
+  useToast,
 } from "@chakra-ui/react"
 import Link from "next/link"
-import { useState } from "react"
+import { useRouter } from "next/router"
+import { useEffect, useState } from "react"
 import { Controller, useForm } from "react-hook-form"
 import { FiEye, FiEyeOff } from "react-icons/fi"
 
 export const SignUp = () => {
   const [isPassword, setIsPassword] = useState(true)
   const emailPattern = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i
+  const { mutate: signUp, isLoading: isLoadingSignUp, isSuccess } = useSignUp()
+  const { push } = useRouter()
+  const toast = useToast()
 
   const {
     handleSubmit,
@@ -33,15 +38,22 @@ export const SignUp = () => {
   })
 
   const onSubmit = async ({ email, password }) => {
-    try {
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-      })
-    } catch (error) {
-      console.error("error", error)
-    }
+    signUp({ email, password })
   }
+
+  useEffect(() => {
+    if (isSuccess) {
+      toast({
+        title: "Vous êtes inscrit",
+        description: "Un mail de confirmation vous a été envoyé",
+        status: "success",
+        duration: 5000,
+        isClosable: true,
+      })
+      push("/signin")
+    }
+  }, [isSuccess, push, toast])
+
   return (
     <Center>
       <Box
@@ -108,7 +120,11 @@ export const SignUp = () => {
                 Déjà un compte ? Connectez-vous
               </Button>
             </Flex>
-            <Button colorScheme="pink" type="submit">
+            <Button
+              isLoading={isLoadingSignUp}
+              colorScheme="pink"
+              type="submit"
+            >
               Inscription
             </Button>
           </VStack>

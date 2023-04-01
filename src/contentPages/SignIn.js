@@ -1,5 +1,5 @@
 import { FormGroup } from "@/components/FormGroup"
-import { supabase } from "@/lib/initSupabase"
+import { useSignIn } from "@/hooks/auth"
 import {
   Box,
   Button,
@@ -9,12 +9,12 @@ import {
   Input,
   InputGroup,
   InputRightElement,
-  useToast,
   VStack,
+  useToast,
 } from "@chakra-ui/react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Controller, useForm } from "react-hook-form"
 import { FiEye, FiEyeOff } from "react-icons/fi"
 
@@ -23,6 +23,12 @@ export const SignIn = () => {
   const [isPassword, setIsPassword] = useState(true)
   const emailPattern = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i
   const toast = useToast()
+  const {
+    mutate: signIn,
+    isLoading: isLoadingSignIn,
+    isSuccess,
+    isError,
+  } = useSignIn()
 
   const {
     handleSubmit,
@@ -35,34 +41,34 @@ export const SignIn = () => {
     },
   })
 
-  const onSubmit = async ({ email, password }) => {
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+  useEffect(() => {
+    if (isSuccess) {
+      toast({
+        title: "Vous êtes connecté",
+        status: "success",
+        duration: 5000,
+        isClosable: true,
       })
-      if (error) {
-        toast({
-          title: "Erreur de connexion",
-          description: "Identifiants invalides",
-          status: "error",
-          duration: 5000,
-          isClosable: true,
-        })
-      }
-      if (data?.session) {
-        toast({
-          title: "Vous êtes connecté",
-          status: "success",
-          duration: 5000,
-          isClosable: true,
-        })
-        push("/")
-      }
-    } catch (error) {
-      console.error("error", error)
+      push("/")
     }
+  }, [isSuccess, push, toast])
+
+  useEffect(() => {
+    if (isError) {
+      toast({
+        title: "Erreur de connexion",
+        description: "Identifiants invalides",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      })
+    }
+  }, [isError, toast])
+
+  const onSubmit = async ({ email, password }) => {
+    signIn({ email, password })
   }
+
   return (
     <Center>
       <Box
@@ -127,7 +133,11 @@ export const SignIn = () => {
             <Button variant="link" as={Link} href="/signup">
               Pas de compte ? Inscrivez-vous
             </Button>
-            <Button colorScheme="pink" type="submit">
+            <Button
+              isLoading={isLoadingSignIn}
+              colorScheme="pink"
+              type="submit"
+            >
               Connexion
             </Button>
           </VStack>

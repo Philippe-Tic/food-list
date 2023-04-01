@@ -27,9 +27,49 @@ const logout = async () => {
   }
 }
 
-export default function useLogOut() {
+export const useLogOut = () => {
   const queryClient = useQueryClient()
   return useMutation(() => logout(), {
+    onSuccess: () => {
+      queryClient.removeQueries()
+    },
+  })
+}
+
+const signUp = async ({ email, password }) => {
+  const { error } = await supabase.auth.signUp({
+    email,
+    password,
+  })
+
+  if (error) {
+    throw new Error(error.message)
+  }
+}
+
+export const useSignUp = () => {
+  const queryClient = useQueryClient()
+  return useMutation((formData) => signUp(formData), {
+    onSuccess: () => {
+      queryClient.removeQueries()
+    },
+  })
+}
+
+const signIn = async ({ email, password }) => {
+  const { error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  })
+
+  if (error) {
+    throw new Error(error.message)
+  }
+}
+
+export const useSignIn = () => {
+  const queryClient = useQueryClient()
+  return useMutation((formData) => signIn(formData), {
     onSuccess: () => {
       queryClient.removeQueries()
     },

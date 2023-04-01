@@ -2,7 +2,7 @@ import { supabase } from "@/lib/initSupabase"
 import { useQuery } from "@tanstack/react-query"
 
 const getRecipes = async () => {
-  const { data, error } = await supabase.from("recipe").select()
+  const { data, error } = await supabase.from("recipes").select()
 
   if (error) {
     throw new Error(error.message)
@@ -16,5 +16,5 @@ const getRecipes = async () => {
 }
 
 export const useRecipes = () => {
-  return useQuery(["recipe"], getRecipes)
+  return useQuery(["recipes"], getRecipes)
 }

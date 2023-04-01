@@ -1,4 +1,4 @@
-import useLogOut, { useCurrentUser } from "@/hooks/auth"
+import { useCurrentUser, useLogOut } from "@/hooks/auth"
 import { Box, Button, Center, Spinner, useToast } from "@chakra-ui/react"
 import Head from "next/head"
 import { useRouter } from "next/navigation"
@@ -55,7 +55,6 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main>
-        {user?.email}
         <Button isLoading={isLoading} onClick={handleLogout}>
           Déco
         </Button>

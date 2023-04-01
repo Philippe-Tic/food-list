@@ -28,6 +28,8 @@ export default function Home() {
     data: user,
   } = useCurrentUser()
 
+  console.log({ user })
+
   const {
     isLoading: isLoadingRecipes,
     error: errorRecipes,

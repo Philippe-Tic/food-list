@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 import { FormGroup } from "@/components/FormGroup"
 import { useSignUp } from "@/hooks/auth"
 import {
@@ -11,18 +12,19 @@ import {
   InputGroup,
   InputRightElement,
   VStack,
+  useColorModeValue,
   useToast,
 } from "@chakra-ui/react"
 import Link from "next/link"
 import { useRouter } from "next/router"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { Controller, useForm } from "react-hook-form"
 import { FiEye, FiEyeOff } from "react-icons/fi"
 
 export const SignUp = () => {
   const [isPassword, setIsPassword] = useState(true)
   const emailPattern = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i
-  const { mutate: signUp, isLoading: isLoadingSignUp, isSuccess } = useSignUp()
+  const { mutate: signUp, isLoading: isLoadingSignUp } = useSignUp()
   const { push } = useRouter()
   const toast = useToast()
 
@@ -38,31 +40,41 @@ export const SignUp = () => {
   })
 
   const onSubmit = async ({ email, password }) => {
-    signUp({ email, password })
+    signUp(
+      { email, password },
+      {
+        onSuccess: () => {
+          toast({
+            title: "Vous êtes inscrit",
+            description: "Un mail de confirmation vous a été envoyé",
+            status: "success",
+            duration: 5000,
+            isClosable: true,
+          })
+          push("/signin")
+        },
+        onError: () => {
+          toast({
+            title: "Une erreur est survenue",
+            description: "",
+            status: "error",
+            duration: 5000,
+            isClosable: true,
+          })
+        },
+      }
+    )
   }
-
-  useEffect(() => {
-    if (isSuccess) {
-      toast({
-        title: "Vous êtes inscrit",
-        description: "Un mail de confirmation vous a été envoyé",
-        status: "success",
-        duration: 5000,
-        isClosable: true,
-      })
-      push("/signin")
-    }
-  }, [isSuccess, push, toast])
 
   return (
     <Center>
       <Box
         borderRadius="xl"
-        background="gray.50"
+        background={useColorModeValue("gray.50", "gray.700")}
         boxShadow="lg"
         p={8}
-        mt="32"
-        w="50%"
+        w="full"
+        maxW="30rem"
       >
         <form onSubmit={handleSubmit(onSubmit)}>
           <VStack spacing="4" alignItems="flex-start">
@@ -81,7 +93,7 @@ export const SignUp = () => {
                     message: "Email invalide",
                   },
                 }}
-                render={({ field }) => <Input background="white" {...field} />}
+                render={({ field }) => <Input {...field} />}
               />
             </FormGroup>
             <FormGroup
@@ -97,11 +109,7 @@ export const SignUp = () => {
                 }}
                 render={({ field }) => (
                   <InputGroup>
-                    <Input
-                      background="white"
-                      type={isPassword ? "password" : "text"}
-                      {...field}
-                    />
+                    <Input type={isPassword ? "password" : "text"} {...field} />
                     <InputRightElement>
                       <IconButton
                         size="sm"
@@ -117,7 +125,7 @@ export const SignUp = () => {
             </FormGroup>
             <Flex w="full">
               <Button variant="link" as={Link} href="/signin">
-                Déjà un compte ? Connectez-vous
+                Déjà un compte ?
               </Button>
             </Flex>
             <Button

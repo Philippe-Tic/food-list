@@ -1,3 +1,4 @@
+import { Recipes } from "@/contentPages/Recipes"
 import { Box, Center, Spinner } from "@chakra-ui/react"
 import Head from "next/head"
 
@@ -31,12 +32,7 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main>
-        Mes recettes
-        {errorRecipes && "Error loading recipes"}
-        {!errorRecipes &&
-          recipes?.map((recipe) => {
-            return <Box key={recipe.id}>{recipe.name}</Box>
-          })}
+        <Recipes />
       </main>
     </>
   )

@@ -57,7 +57,7 @@ export const useSignUp = () => {
 }
 
 const signIn = async ({ email, password }) => {
-  const { error } = await supabase.auth.signInWithPassword({
+  const { data, error } = await supabase.auth.signInWithPassword({
     email,
     password,
   })
@@ -65,6 +65,7 @@ const signIn = async ({ email, password }) => {
   if (error) {
     throw new Error(error.message)
   }
+  return data
 }
 
 export const useSignIn = () => {

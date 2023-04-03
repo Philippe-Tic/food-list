@@ -1,15 +1,19 @@
 import { FormGroup } from "@/components/FormGroup"
 import { useSignIn } from "@/hooks/auth"
+import { useAuthContext } from "@/pages/_app"
 import {
   Box,
   Button,
   Center,
+  Flex,
   Icon,
   IconButton,
   Input,
   InputGroup,
   InputRightElement,
+  Spinner,
   VStack,
+  useColorModeValue,
   useToast,
 } from "@chakra-ui/react"
 import Link from "next/link"
@@ -19,16 +23,18 @@ import { Controller, useForm } from "react-hook-form"
 import { FiEye, FiEyeOff } from "react-icons/fi"
 
 export const SignIn = () => {
+  const { isAuthenticated, updateToken, setCurrentUser } = useAuthContext()
   const { push } = useRouter()
   const [isPassword, setIsPassword] = useState(true)
   const emailPattern = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i
   const toast = useToast()
-  const {
-    mutate: signIn,
-    isLoading: isLoadingSignIn,
-    isSuccess,
-    isError,
-  } = useSignIn()
+  const { mutate: signIn, isLoading: isLoadingSignIn } = useSignIn()
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      push("/")
+    }
+  }, [isAuthenticated, push])
 
   const {
     handleSubmit,
@@ -41,43 +47,61 @@ export const SignIn = () => {
     },
   })
 
-  useEffect(() => {
-    if (isSuccess) {
-      toast({
-        title: "Vous êtes connecté",
-        status: "success",
-        duration: 5000,
-        isClosable: true,
-      })
-      push("/")
-    }
-  }, [isSuccess, push, toast])
-
-  useEffect(() => {
-    if (isError) {
-      toast({
-        title: "Erreur de connexion",
-        description: "Identifiants invalides",
-        status: "error",
-        duration: 5000,
-        isClosable: true,
-      })
-    }
-  }, [isError, toast])
-
   const onSubmit = async ({ email, password }) => {
-    signIn({ email, password })
+    signIn(
+      { email, password },
+      {
+        onSuccess: ({ session, user }) => {
+          updateToken(session.access_token)
+          setCurrentUser(user)
+          toast({
+            title: "Vous êtes connecté",
+            status: "success",
+            duration: 5000,
+            isClosable: true,
+          })
+          push("/")
+        },
+        onError: () => {
+          toast({
+            title: "Erreur de connexion",
+            description: "Identifiants invalides",
+            status: "error",
+            duration: 5000,
+            isClosable: true,
+          })
+        },
+      }
+    )
+  }
+
+  const bgColor = useColorModeValue("gray.50", "gray.700")
+
+  if (isAuthenticated) {
+    return (
+      <Box>
+        <Center>
+          <Spinner />
+        </Center>
+      </Box>
+    )
   }
 
   return (
-    <Center>
+    <Flex
+      w="full"
+      flex="1"
+      alignItems="center"
+      justifyContent="center"
+      h="full"
+    >
       <Box
         borderRadius="xl"
-        background="gray.50"
+        background={bgColor}
         boxShadow="lg"
         p={8}
-        mt="32"
-        w="50%"
+        w="full"
+        maxW="30rem"
       >
         <form onSubmit={handleSubmit(onSubmit)}>
           <VStack spacing="4" alignItems="flex-start">
@@ -96,7 +120,7 @@ export const SignIn = () => {
                     message: "Email invalide",
                   },
                 }}
-                render={({ field }) => <Input background="white" {...field} />}
+                render={({ field }) => <Input {...field} />}
               />
             </FormGroup>
             <FormGroup
@@ -112,11 +136,7 @@ export const SignIn = () => {
                 }}
                 render={({ field }) => (
                   <InputGroup>
-                    <Input
-                      background="white"
-                      type={isPassword ? "password" : "text"}
-                      {...field}
-                    />
+                    <Input type={isPassword ? "password" : "text"} {...field} />
                     <InputRightElement>
                       <IconButton
                         size="sm"
@@ -131,7 +151,7 @@ export const SignIn = () => {
               />
             </FormGroup>
             <Button variant="link" as={Link} href="/signup">
-              Pas de compte ? Inscrivez-vous
+              Pas de compte ?
             </Button>
             <Button
               isLoading={isLoadingSignIn}
@@ -143,6 +163,6 @@ export const SignIn = () => {
           </VStack>
         </form>
       </Box>
-    </Center>
+    </Flex>
   )
 }

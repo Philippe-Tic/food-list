@@ -1,30 +1,40 @@
 import { FormGroup } from "@/components/FormGroup"
 import { useSignIn } from "@/hooks/auth"
+import { useAuthContext } from "@/pages/_app"
 import {
   Box,
   Button,
   Center,
+  Flex,
   Icon,
   IconButton,
   Input,
   InputGroup,
   InputRightElement,
+  Spinner,
   VStack,
   useColorModeValue,
   useToast,
 } from "@chakra-ui/react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Controller, useForm } from "react-hook-form"
 import { FiEye, FiEyeOff } from "react-icons/fi"
 
 export const SignIn = () => {
+  const { isAuthenticated, updateToken, setCurrentUser } = useAuthContext()
   const { push } = useRouter()
   const [isPassword, setIsPassword] = useState(true)
   const emailPattern = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i
   const toast = useToast()
   const { mutate: signIn, isLoading: isLoadingSignIn } = useSignIn()
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      push("/")
+    }
+  }, [isAuthenticated, push])
 
   const {
     handleSubmit,
@@ -41,7 +51,9 @@ export const SignIn = () => {
     signIn(
       { email, password },
       {
-        onSuccess: () => {
+        onSuccess: ({ session, user }) => {
+          updateToken(session.access_token)
+          setCurrentUser(user)
           toast({
             title: "Vous êtes connecté",
             status: "success",
@@ -63,11 +75,29 @@ export const SignIn = () => {
     )
   }
 
+  const bgColor = useColorModeValue("gray.50", "gray.700")
+
+  if (isAuthenticated) {
+    return (
+      <Box>
+        <Center>
+          <Spinner />
+        </Center>
+      </Box>
+    )
+  }
+
   return (
-    <Center>
+    <Flex
+      w="full"
+      flex="1"
+      alignItems="center"
+      justifyContent="center"
+      h="full"
+    >
       <Box
         borderRadius="xl"
-        background={useColorModeValue("gray.50", "gray.700")}
+        background={bgColor}
         boxShadow="lg"
         p={8}
         w="full"
@@ -133,6 +163,6 @@ export const SignIn = () => {
           </VStack>
         </form>
       </Box>
-    </Center>
+    </Flex>
   )
 }

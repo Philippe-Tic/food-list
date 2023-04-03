@@ -1,44 +1,18 @@
-import { useCurrentUser, useLogOut } from "@/hooks/auth"
-import { Box, Button, Center, Spinner, useToast } from "@chakra-ui/react"
+import { Box, Center, Spinner } from "@chakra-ui/react"
 import Head from "next/head"
-import { useRouter } from "next/navigation"
 
 import { useRecipes } from "../hooks/recipes"
 
 export default function Home() {
-  const toast = useToast()
-  const { push } = useRouter()
-  const { mutate: logOut, isLoading: isLoadingLogout } = useLogOut()
-
-  const handleLogout = () => {
-    logOut()
-    toast({
-      title: "Déconnexion",
-      description: "",
-      status: "success",
-      duration: 9000,
-      isClosable: true,
-    })
-    push("/signin")
-  }
-
-  const {
-    isLoading: isLoadingCurrentUser,
-    error: errorCurrentUser,
-    data: user,
-  } = useCurrentUser()
-
-  console.log({ user })
-
   const {
     isLoading: isLoadingRecipes,
     error: errorRecipes,
     data: recipes,
   } = useRecipes()
 
-  const isLoading = isLoadingRecipes || isLoadingCurrentUser || isLoadingLogout
+  const isLoading = isLoadingRecipes
 
-  if (isLoading || errorCurrentUser) {
+  if (isLoading) {
     return (
       <Box pt={32}>
         <Center>
@@ -57,9 +31,7 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main>
-        <Button isLoading={isLoading} onClick={handleLogout}>
-          Déco
-        </Button>
+        Mes recettes
         {errorRecipes && "Error loading recipes"}
         {!errorRecipes &&
           recipes?.map((recipe) => {

@@ -4,7 +4,6 @@ import { useSignUp } from "@/hooks/auth"
 import {
   Box,
   Button,
-  Center,
   Flex,
   Icon,
   IconButton,
@@ -67,7 +66,14 @@ export const SignUp = () => {
   }
 
   return (
-    <Center>
+    <Flex
+      w="full"
+      flex="1"
+      alignItems="center"
+      justifyContent="center"
+      h="full"
+    >
+      {" "}
       <Box
         borderRadius="xl"
         background={useColorModeValue("gray.50", "gray.700")}
@@ -138,6 +144,6 @@ export const SignUp = () => {
           </VStack>
         </form>
       </Box>
-    </Center>
+    </Flex>
   )
 }

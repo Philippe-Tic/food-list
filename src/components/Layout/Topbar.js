@@ -69,7 +69,7 @@ export const Topbar = () => {
             colorScheme="pink"
             size="lg"
             onClick={() => {
-              push("/")
+              push("/recipes")
             }}
           >
             FoodList
@@ -79,7 +79,7 @@ export const Topbar = () => {
               <ButtonGroup variant="link" spacing="8">
                 <Button
                   onClick={() => {
-                    push("/")
+                    push("/recipes")
                   }}
                 >
                   Mes recettes

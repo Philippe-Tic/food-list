@@ -1,18 +1,30 @@
 import { RecipeCard } from "@/components/Recipe/RecipeCard"
-import { Box, Center, Flex, SimpleGrid, Spinner, Text } from "@chakra-ui/react"
+import { useAuthContext } from "@/pages/_app"
+import {
+  Box,
+  Button,
+  Center,
+  Flex,
+  SimpleGrid,
+  Spinner,
+  Text,
+  VStack,
+} from "@chakra-ui/react"
+import { useRouter } from "next/router"
 
-import { useRecipes } from "../hooks/recipes"
+import { useMyRecipes } from "../hooks/recipes"
 
 export const Recipes = () => {
+  const { currentUser } = useAuthContext()
+  const { push } = useRouter()
+
   const {
     isLoading: isLoadingRecipes,
     error: errorRecipes,
     data: recipes,
-  } = useRecipes()
+  } = useMyRecipes(JSON.parse(currentUser)?.email)
 
-  const isLoading = isLoadingRecipes
-
-  if (isLoading) {
+  if (isLoadingRecipes) {
     return (
       <Box pt={32}>
         <Center>
@@ -22,18 +34,32 @@ export const Recipes = () => {
     )
   }
   return (
-    <Flex flexDir="column">
-      <Flex>
-        <Text>Mes recettes</Text>
+    <VStack spacing="6" alignItems="flex-start" w="full" flexDir="column">
+      <Flex w="full" justifyContent="space-between">
+        <Text fontSize="xl" fontWeight="bold">
+          Mes recettes
+        </Text>
+        <Button
+          onClick={() => {
+            push("/recipes/create")
+          }}
+          colorScheme="pink"
+        >
+          Ajouter
+        </Button>
       </Flex>
       {errorRecipes && "Error loading recipes"}
       {!errorRecipes && (
-        <SimpleGrid columns={{ base: 1, sm: 2, md: 3, lg: 4 }}>
+        <SimpleGrid
+          w="full"
+          spacing={8}
+          columns={{ base: 1, sm: 2, md: 3, lg: 4 }}
+        >
           {recipes?.map((recipe) => {
             return <RecipeCard key={recipe.id} recipe={recipe} />
           })}
         </SimpleGrid>
       )}
-    </Flex>
+    </VStack>
   )
 }

@@ -23,13 +23,26 @@ const updateToken = (newToken) => {
   }
 }
 
+const updateUser = (newUser) => {
+  const parsedUser = JSON.stringify(newUser)
+  if (!isBrowserLoaded) {
+    return () => undefined
+  }
+
+  if (!parsedUser) {
+    localStorage.removeItem("currentUser")
+  } else {
+    localStorage.setItem("currentUser", parsedUser)
+  }
+}
+
 export default function App({ Component, pageProps }) {
   const [authToken, setAuthToken] = useState(
     isBrowserLoaded && localStorage.getItem("authToken")
   )
 
   const [currentUser, setCurrentUser] = useState(
-    isBrowserLoaded && localStorage.getItem("authToken")
+    isBrowserLoaded && localStorage.getItem("currentUser")
   )
 
   const handleUpdateToken = useCallback(
@@ -39,6 +52,15 @@ export default function App({ Component, pageProps }) {
     },
     [setAuthToken]
   )
+
+  const handleUpdateUser = useCallback(
+    (newUser) => {
+      setCurrentUser(JSON.stringify(newUser))
+      updateUser(newUser)
+    },
+    [setCurrentUser]
+  )
+
   return (
     <ChakraProvider theme={theme}>
       <QueryClientProvider client={queryClient}>
@@ -47,7 +69,7 @@ export default function App({ Component, pageProps }) {
             isAuthenticated: !!authToken,
             updateToken: handleUpdateToken,
             currentUser,
-            setCurrentUser,
+            setCurrentUser: handleUpdateUser,
           }}
         >
           <Flex minH="100vh" direction="column" flex="1">

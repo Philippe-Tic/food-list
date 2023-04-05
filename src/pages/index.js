@@ -1,27 +1,18 @@
-import { Recipes } from "@/contentPages/Recipes"
-import { Box, Center, Spinner } from "@chakra-ui/react"
+import { useAuthContext } from "@/pages/_app"
+import { Spinner } from "@chakra-ui/react"
 import Head from "next/head"
-
-import { useRecipes } from "../hooks/recipes"
+import { useRouter } from "next/router"
+import { useEffect } from "react"
 
 export default function Home() {
-  const {
-    isLoading: isLoadingRecipes,
-    error: errorRecipes,
-    data: recipes,
-  } = useRecipes()
+  const { isAuthenticated } = useAuthContext()
+  const { push } = useRouter()
 
-  const isLoading = isLoadingRecipes
-
-  if (isLoading) {
-    return (
-      <Box pt={32}>
-        <Center>
-          <Spinner />
-        </Center>
-      </Box>
-    )
-  }
+  useEffect(() => {
+    if (isAuthenticated) {
+      push("/recipes")
+    }
+  }, [isAuthenticated, push])
 
   return (
     <>
@@ -32,7 +23,7 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main>
-        <Recipes />
+        <Spinner />
       </main>
     </>
   )

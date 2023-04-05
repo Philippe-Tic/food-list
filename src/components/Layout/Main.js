@@ -8,7 +8,7 @@ export const Main = ({ children, ...props }) => {
       role="main"
       direction="column"
       flex="1"
-      py="24"
+      py="28"
       {...props}
     >
       {children}

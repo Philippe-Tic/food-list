@@ -19,11 +19,11 @@ export const useAllRecipes = () => {
   return useQuery(["recipes"], getAllRecipes)
 }
 
-const getMyRecipes = async (email) => {
+const getMyRecipes = async (id) => {
   const { data, error } = await supabase
     .from("recipes")
-    .select("id, name, email, food")
-    .eq("email", email)
+    .select("id, name, user_id, food")
+    .eq("user_id", id)
 
   if (error) {
     throw new Error(error.message)
@@ -36,8 +36,8 @@ const getMyRecipes = async (email) => {
   return data
 }
 
-export const useMyRecipes = (email) => {
-  return useQuery(["recipes", email], () => getMyRecipes(email))
+export const useMyRecipes = (id) => {
+  return useQuery(["recipes", id], () => getMyRecipes(id))
 }
 
 const getRecipe = async (id) => {
@@ -81,6 +81,46 @@ export const useEditRecipe = () => {
   return useMutation((formData) => editRecipe(formData), {
     onSuccess: () => {
       queryClient.removeQueries()
+    },
+  })
+}
+
+const createRecipe = async ({ formData, currentUser }) => {
+  const id = JSON.parse(currentUser)?.id
+  const { error } = await supabase
+    .from("recipes")
+    .insert({ ...formData, user_id: id })
+
+  if (error) {
+    throw new Error(error.message)
+  }
+}
+
+export const useCreateRecipe = () => {
+  const queryClient = useQueryClient()
+  return useMutation(
+    ({ formData, currentUser }) => createRecipe({ formData, currentUser }),
+    {
+      onSuccess: () => {
+        queryClient.removeQueries()
+      },
+    }
+  )
+}
+
+const deleteRecipe = async (id) => {
+  const { error } = await supabase.from("recipes").delete().eq("id", id)
+
+  if (error) {
+    throw new Error(error.message)
+  }
+}
+
+export const useDeleteRecipe = () => {
+  const queryClient = useQueryClient()
+  return useMutation((id) => deleteRecipe(id), {
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["recipes"] })
     },
   })
 }

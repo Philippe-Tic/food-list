@@ -22,7 +22,7 @@ export const Recipes = () => {
     isLoading: isLoadingRecipes,
     error: errorRecipes,
     data: recipes,
-  } = useMyRecipes(JSON.parse(currentUser)?.email)
+  } = useMyRecipes(JSON.parse(currentUser)?.id)
 
   if (isLoadingRecipes) {
     return (

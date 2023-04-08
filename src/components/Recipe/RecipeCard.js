@@ -1,3 +1,5 @@
+import { ConfirmMenuItem } from "@/components/ConfirmMenuItem"
+import { useDeleteRecipe } from "@/hooks/recipes"
 import {
   Badge,
   Divider,
@@ -8,17 +10,46 @@ import {
   MenuButton,
   MenuItem,
   MenuList,
+  Spinner,
   Text,
   VStack,
   Wrap,
   WrapItem,
   useColorModeValue,
+  useToast,
 } from "@chakra-ui/react"
 import { useRouter } from "next/router"
 import { FaArrowRight, FaEllipsisV } from "react-icons/fa"
 
 export const RecipeCard = ({ recipe }) => {
   const { push } = useRouter()
+  const { mutate: deleteRecipe, isLoading } = useDeleteRecipe()
+
+  const toast = useToast()
+
+  const handleDelete = async () => {
+    deleteRecipe(recipe?.id, {
+      onSuccess: () => {
+        toast({
+          title: "Recette supprimée",
+          description: "",
+          status: "success",
+          duration: 5000,
+          isClosable: true,
+        })
+      },
+      onError: () => {
+        toast({
+          title: "Impossible de supprimer la recette",
+          description: "",
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+        })
+      },
+    })
+  }
+
   return (
     <VStack
       alignItems="flex-start"
@@ -30,7 +61,6 @@ export const RecipeCard = ({ recipe }) => {
       boxShadow="lg"
       p={6}
       flexDir="column"
-      spacing="auto"
     >
       <Text fontSize="lg" fontWeight="bold">
         {recipe.name}
@@ -45,7 +75,7 @@ export const RecipeCard = ({ recipe }) => {
           )
         })}
       </Wrap>
-      <HStack justifyContent="flex-end" w="full">
+      <HStack flex="1" alignItems="flex-end" justifyContent="flex-end" w="full">
         <Menu>
           <MenuButton as={IconButton} icon={<Icon as={FaEllipsisV} />} />
           <MenuList>
@@ -56,7 +86,9 @@ export const RecipeCard = ({ recipe }) => {
             >
               Modifier
             </MenuItem>
-            <MenuItem>Supprimer</MenuItem>
+            <ConfirmMenuItem onClick={handleDelete}>
+              {isLoading ? <Spinner /> : "Supprimer"}
+            </ConfirmMenuItem>
           </MenuList>
         </Menu>
         <IconButton

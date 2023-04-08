@@ -62,6 +62,7 @@ export const Topbar = () => {
       as="nav"
       bg={useColorModeValue("gray.100", "gray.900")}
       boxShadow="sm"
+      zIndex="1"
     >
       <Box px={{ base: 2, sm: 4, md: 8 }} py={{ base: "4", lg: "5" }}>
         <HStack spacing="10" justify="space-between">
@@ -69,7 +70,7 @@ export const Topbar = () => {
             colorScheme="pink"
             size="lg"
             onClick={() => {
-              push("/")
+              push("/recipes")
             }}
           >
             FoodList
@@ -79,7 +80,7 @@ export const Topbar = () => {
               <ButtonGroup variant="link" spacing="8">
                 <Button
                   onClick={() => {
-                    push("/")
+                    push("/recipes")
                   }}
                 >
                   Mes recettes

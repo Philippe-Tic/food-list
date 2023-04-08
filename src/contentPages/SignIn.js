@@ -1,4 +1,5 @@
-import { FormGroup } from "@/components/FormGroup"
+import { FormInput } from "@/components/Form/FormInput"
+import { FormPassword } from "@/components/Form/FormPassword"
 import { useSignIn } from "@/hooks/auth"
 import { useAuthContext } from "@/pages/_app"
 import {
@@ -6,11 +7,6 @@ import {
   Button,
   Center,
   Flex,
-  Icon,
-  IconButton,
-  Input,
-  InputGroup,
-  InputRightElement,
   Spinner,
   VStack,
   useColorModeValue,
@@ -18,14 +14,12 @@ import {
 } from "@chakra-ui/react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
-import { Controller, useForm } from "react-hook-form"
-import { FiEye, FiEyeOff } from "react-icons/fi"
+import { useEffect } from "react"
+import { FormProvider, useForm } from "react-hook-form"
 
 export const SignIn = () => {
   const { isAuthenticated, updateToken, setCurrentUser } = useAuthContext()
   const { push } = useRouter()
-  const [isPassword, setIsPassword] = useState(true)
   const emailPattern = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i
   const toast = useToast()
   const { mutate: signIn, isLoading: isLoadingSignIn } = useSignIn()
@@ -36,11 +30,7 @@ export const SignIn = () => {
     }
   }, [isAuthenticated, push])
 
-  const {
-    handleSubmit,
-    formState: { errors },
-    control,
-  } = useForm({
+  const methods = useForm({
     defaultValues: {
       email: "",
       password: "",
@@ -103,16 +93,12 @@ export const SignIn = () => {
         w="full"
         maxW="30rem"
       >
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <VStack spacing="4" alignItems="flex-start">
-            <FormGroup
-              errorMessage={errors?.email?.message}
-              showError={errors?.email}
-              label="Email"
-            >
-              <Controller
+        <FormProvider {...methods}>
+          <form onSubmit={methods.handleSubmit(onSubmit)}>
+            <VStack spacing="4" alignItems="flex-start">
+              <FormInput
                 name="email"
-                control={control}
+                label="Email"
                 rules={{
                   required: "L'email est requis",
                   pattern: {
@@ -120,48 +106,27 @@ export const SignIn = () => {
                     message: "Email invalide",
                   },
                 }}
-                render={({ field }) => <Input {...field} />}
               />
-            </FormGroup>
-            <FormGroup
-              errorMessage={errors?.password?.message}
-              showError={errors?.password}
-              label="Mot de passe"
-            >
-              <Controller
+              <FormPassword
                 name="password"
-                control={control}
+                label="Password"
                 rules={{
                   required: "Le mot de passe est requis",
                 }}
-                render={({ field }) => (
-                  <InputGroup>
-                    <Input type={isPassword ? "password" : "text"} {...field} />
-                    <InputRightElement>
-                      <IconButton
-                        size="sm"
-                        onClick={() => {
-                          setIsPassword(!isPassword)
-                        }}
-                        icon={<Icon as={isPassword ? FiEyeOff : FiEye} />}
-                      />
-                    </InputRightElement>
-                  </InputGroup>
-                )}
               />
-            </FormGroup>
-            <Button variant="link" as={Link} href="/signup">
-              Pas de compte ?
-            </Button>
-            <Button
-              isLoading={isLoadingSignIn}
-              colorScheme="pink"
-              type="submit"
-            >
-              Connexion
-            </Button>
-          </VStack>
-        </form>
+              <Button variant="link" as={Link} href="/signup">
+                Pas de compte ?
+              </Button>
+              <Button
+                isLoading={isLoadingSignIn}
+                colorScheme="pink"
+                type="submit"
+              >
+                Connexion
+              </Button>
+            </VStack>
+          </form>
+        </FormProvider>
       </Box>
     </Flex>
   )

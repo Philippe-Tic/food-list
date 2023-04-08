@@ -15,8 +15,8 @@ export const Footer = () => {
   const [activeRoute, setActiveRoute] = useState("")
 
   useEffect(() => {
-    if (pathname === "/") {
-      setActiveRoute("")
+    if (pathname === "/recipes") {
+      setActiveRoute("recipes")
     } else if (pathname === "/food-list") {
       setActiveRoute("food-list")
     } else if (pathname === "/community") {
@@ -26,7 +26,7 @@ export const Footer = () => {
     }
   }, [pathname])
 
-  const isRecipeActive = activeRoute === ""
+  const isRecipeActive = activeRoute === "recipes"
   const isFoodListActive = activeRoute === "food-list"
   const isCommunityActive = activeRoute === "community"
 
@@ -54,7 +54,7 @@ export const Footer = () => {
         h="full"
         color={isRecipeActive ? activeColor : inactiveColor}
         background={isRecipeActive ? activeBg : inactiveBg}
-        onClick={() => push("/")}
+        onClick={() => push("/recipes")}
       >
         <Icon as={FaMitten}></Icon>
         <Text fontSize="xs" fontWeight={isRecipeActive ? "bold" : "500"}>
